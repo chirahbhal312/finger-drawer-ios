@@ -3,41 +3,55 @@
 <head>
   <meta charset="UTF-8" />
   <title>Three.js Cube in Model Viewer</title>
+
+  <!-- Import Map for Three.js -->
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+        "three/examples/jsm/webxr/ARButton.js": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/webxr/ARButton.js"
+      }
+    }
+  </script>
+
+  <!-- Model Viewer -->
+  <script type="module" src="https://cdn.jsdelivr.net/npm/@google/model-viewer@3.3.0/dist/model-viewer.min.js"></script>
+</head>
+<body>
+  <h2>Cube in &lt;model-viewer&gt;</h2>
+  <model-viewer id="viewer" camera-controls auto-rotate style="width: 300px; height: 300px;"></model-viewer>
+
   <script type="module">
-    import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
+    import * as THREE from 'three';
     import { GLTFExporter } from 'https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/exporters/GLTFExporter.js';
 
+    // Setup scene
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
-    const renderer = new THREE.WebGLRenderer({ alpha: true });
-    renderer.setSize(300, 300);
+    camera.position.z = 2;
 
-    const cubeGeometry = new THREE.BoxGeometry();
-    const cubeMaterial = new THREE.MeshStandardMaterial({ color: 0x00ff00 });
-    const cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
+    // Cube
+    const geometry = new THREE.BoxGeometry();
+    const material = new THREE.MeshStandardMaterial({ color: 0x00ff00 });
+    const cube = new THREE.Mesh(geometry, material);
     scene.add(cube);
 
+    // Light
     const light = new THREE.DirectionalLight(0xffffff, 1);
     light.position.set(5, 5, 5);
     scene.add(light);
 
-    camera.position.z = 2;
-
+    // Export to GLB and display in model-viewer
     const exporter = new GLTFExporter();
     exporter.parse(
       scene,
-      (gltf) => {
-        const blob = new Blob([gltf], { type: 'model/gltf-binary' });
+      (result) => {
+        const blob = new Blob([result], { type: 'model/gltf-binary' });
         const url = URL.createObjectURL(blob);
         document.getElementById('viewer').src = url;
       },
       { binary: true }
     );
   </script>
-  <script type="module" src="https://cdn.jsdelivr.net/npm/@google/model-viewer@3.3.0/dist/model-viewer.min.js"></script>
-</head>
-<body>
-  <h2>Cube in &lt;model-viewer&gt;</h2>
-  <model-viewer id="viewer" camera-controls auto-rotate style="width: 300px; height: 300px;"></model-viewer>
 </body>
 </html>
