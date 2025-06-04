@@ -1,69 +1,54 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Three.js Cube in Model Viewer</title>
-
-  <!-- Import Map for Three.js -->
-  <script type="importmap">
-    {
-      "imports": {
-        "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
-        "three/examples/jsm/webxr/ARButton.js": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/webxr/ARButton.js"
-      }
-    }
-  </script>
-
-  <!-- Model Viewer -->
+  <meta charset="UTF-8">
+  <title>Cube in model-viewer</title>
   <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.161.0/examples/js/exporters/GLTFExporter.js"></script>
+  <style>
+    body {
+      margin: 0;
+      display: flex;
+      height: 100vh;
+      justify-content: center;
+      align-items: center;
+      background: #f0f0f0;
+    }
+    model-viewer {
+      width: 400px;
+      height: 400px;
+    }
+  </style>
 </head>
 <body>
-  <h2>Cube in &lt;model-viewer&gt; + AR</h2>
 
-  <!-- AR-enabled Model Viewer using cube.glb -->
-  <model-viewer
-    src="https://www.fab.com/listings/11d20d01-b764-4936-8163-cb20d05c369e"
-    ar
-    ar-modes="scene-viewer webxr quick-look"
-    camera-controls
-    auto-rotate
-    style="width: 90vw; height: 90vh; background-color: #eee;">
-  </model-viewer>
-  <script src="
-https://cdn.jsdelivr.net/npm/three-gltf-exporter@0.0.1/index.min.js
-"></script>
+<model-viewer id="viewer" auto-rotate camera-controls background-color="#ffffff"></model-viewer>
 
-  <!-- Hidden export script (run this once to generate cube.glb) -->
-  <script type="module">
-    import * as THREE from 'three';
+<script type="module">
+  // Step 1: Create a basic cube with Three.js
+  const scene = new THREE.Scene();
+  const geometry = new THREE.BoxGeometry(1, 1, 1);
+  const material = new THREE.MeshStandardMaterial({ color: 0x00ff00 });
+  const cube = new THREE.Mesh(geometry, material);
+  scene.add(cube);
+
+  // Add light for material
+  const light = new THREE.DirectionalLight(0xffffff, 1);
+  light.position.set(5, 5, 5);
+  scene.add(light);
+
+  // Step 2: Export cube to GLB
+  const exporter = new THREE.GLTFExporter();
+  exporter.parse(scene, function (gltf) {
+    const blob = new Blob([gltf], { type: 'model/gltf-binary' });
+    const url = URL.createObjectURL(blob);
     
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
-    camera.position.z = 2;
+    // Step 3: Set model-viewer src to blob URL
+    const viewer = document.getElementById('viewer');
+    viewer.src = url;
+  }, { binary: true });
+</script>
 
-    const geometry = new THREE.BoxGeometry();
-    const material = new THREE.MeshStandardMaterial({ color: 0x00ff00 });
-    const cube = new THREE.Mesh(geometry, material);
-    scene.add(cube);
-
-    const light = new THREE.DirectionalLight(0xffffff, 1);
-    light.position.set(5, 5, 5);
-    scene.add(light);
-
-    const exporter = new GLTFExporter();
-    exporter.parse(
-      scene,
-      (result) => {
-        const blob = new Blob([result], { type: 'model/gltf-binary' });
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(blob);
-        link.download = 'cube.glb';
-        link.textContent = 'Click here to save cube.glb';
-        link.style.display = 'block';
-        document.body.appendChild(link);
-      },
-      { binary: true }
-    );
-  </script>
 </body>
 </html>
